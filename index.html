@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agency Control – Daily Shoots and Promotions</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f5fb;--card:#fff;--ink:#1c1b2e;--mute:#6d6b85;--line:#e5e3f0;--acc:#6d28d9;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;--chip:#efecf9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14131f;--card:#1e1c2e;--ink:#efeefa;--mute:#a09ebc;--line:#322f4a;--acc:#a78bfa;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--chip:#2a2742}}
+:root[data-theme="dark"]{--bg:#14131f;--card:#1e1c2e;--ink:#efeefa;--mute:#a09ebc;--line:#322f4a;--acc:#a78bfa;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--chip:#2a2742}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:14px}
+header{background:linear-gradient(135deg,#4c1d95,#be185d);color:#fff;border-radius:18px;padding:18px;margin-bottom:12px}
+header h1{margin:0;font-size:21px}header input{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:5px 8px;font:inherit;width:auto}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.stat{background:rgba(255,255,255,.16);border-radius:12px;padding:8px;text-align:center;cursor:pointer}.stat b{display:block;font-size:22px}.stat span{font-size:11px;opacity:.9}
+nav{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px}
+nav button,.chips button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 13px;border-radius:999px;font:inherit;cursor:pointer}
+nav button.on,.chips button.on{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+h2{font-size:16px;margin:0 0 8px}h3{font-size:13px;margin:12px 0 6px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+label{font-size:12px;color:var(--mute);display:block}
+input,select,textarea{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px}
+.b{background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer}
+.g{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:inherit;cursor:pointer;font-size:13px}
+a.wa{background:#16a34a;color:#fff;text-decoration:none;border-radius:8px;padding:6px 10px;font-size:13px;display:inline-block}
+a.call{background:var(--chip);color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;display:inline-block}
+.task{border-top:1px solid var(--line);padding:10px 0}.task:first-of-type{border-top:0}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.tag{font-size:11px;background:var(--chip);border-radius:999px;padding:2px 8px;margin-right:4px;color:var(--mute);display:inline-block}
+.st{font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px;color:#fff;white-space:nowrap}
+.mute{color:var(--mute);font-size:13px}.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.late{color:var(--bad);font-weight:600}.person{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:9px 0;border-top:1px solid var(--line)}
+.toast{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);background:var(--acc);color:var(--bg);padding:12px;border-radius:12px;z-index:20;display:none;max-width:560px;margin:auto}
+.chk{display:inline-flex;gap:5px;align-items:center;margin-right:10px;font-size:13px}.chk input{width:auto}
+</style></head><body>
+<div class="toast" id="toast"></div>
+<div class="wrap">
+<header><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><h1 id="co">📣 Agency Control</h1><input type="date" id="viewdate" aria-label="Date"></div>
+<div class="mute" style="color:#fff;opacity:.85;font-size:13px">Manage the home team's shoots and promotions from anywhere</div>
+<div class="stats" id="stats"></div></header>
+<nav id="nav"></nav><main id="main"></main>
+</div>
+<script>
+var KEY="agency_control_v1",S,tab="work",flt="today",grp="date";
+var STAT=[["planned","Planned","#6b7280"],["shooting","Shooting","#2563eb"],["editing","Editing","#d97706"],["ready","Ready to post","#7c3aed"],["posted","Posted","#15803d"],["blocked","Blocked","#b91c1c"]];
+var TYPES=["Hotel room tour reel","Restaurant food shoot","Offer / promo poster","Customer testimonial","Event coverage","Story series","Product photoshoot","Ad video","Other"];
+var PLAT=["Instagram","Facebook","YouTube","WhatsApp status","Multiple"];
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function iso(d){var z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)}
+function addDays(s,n){var d=new Date(s+"T00:00");d.setDate(d.getDate()+n);return iso(d)}
+function seed(){return{company:"Agency Control",today:iso(new Date()),team:[],clients:[],tasks:[],lead:60,notified:{}}}
+function load(){try{var r=localStorage.getItem(KEY);S=r?JSON.parse(r):seed()}catch(e){S=seed()}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function digits(p){var d=String(p||"").replace(/\D/g,"");if(d.length===10)d="91"+d;return d}
+function wa(p,m){return"https://wa.me/"+digits(p)+"?text="+encodeURIComponent(m)}
+function fd(d){return d?new Date(d+"T00:00").toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"}):"No date"}
+function ft(t){if(!t)return"";var p=t.split(":"),h=+p[0];return(h%12||12)+":"+p[1]+(h<12?" AM":" PM")}
+function g(i){return document.getElementById(i).value}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.style.display="block";setTimeout(function(){t.style.display="none"},6000)}
+function cl(i){return S.clients.filter(function(c){return c.id===i})[0]}
+function tm(i){return S.team.filter(function(m){return m.id===i})[0]}
+function whoN(a){return(a||[]).map(function(i){var m=tm(i);return m?m.name:""}).filter(Boolean).join(", ")}
+function stOf(k){return STAT.filter(function(s){return s[0]===k})[0]}
+function isOpen(t){return t.status!=="posted"}
+function late(t){return isOpen(t)&&t.date&&t.date<S.today}
+function tmsg(t){var c=cl(t.client);return"📌 "+t.title+(c?"\n🏢 Client: "+c.name:"")+"\n📅 "+fd(t.date)+(t.time?" at "+ft(t.time):"")+(t.loc?"\n📍 "+t.loc:"")+(t.platform?"\n📱 Post on: "+t.platform:"")+(t.notes?"\n📝 "+t.notes:"")}
+function filt(){return S.tasks.filter(function(t){
+ if(flt==="today")return t.date===S.today;if(flt==="tomorrow")return t.date===addDays(S.today,1);
+ if(flt==="week")return t.date>=S.today&&t.date<=addDays(S.today,7);if(flt==="late")return late(t);
+ if(flt==="post")return t.status==="ready";if(flt==="blocked")return t.status==="blocked";return true})
+ .sort(function(a,b){return((a.date||"9")+(a.time||"")).localeCompare((b.date||"9")+(b.time||""))})}
+function stats(){var n=function(f){return S.tasks.filter(f).length};
+ var a=[["Today",n(function(t){return t.date===S.today&&isOpen(t)}),"today"],["Overdue",n(late),"late"],["To post",n(function(t){return t.status==="ready"}),"post"],["Blocked",n(function(t){return t.status==="blocked"}),"blocked"]];
+ document.getElementById("stats").innerHTML=a.map(function(x){return'<div class="stat" onclick="setF(\''+x[2]+'\')"><b>'+x[1]+"</b><span>"+x[0]+"</span></div>"}).join("")}
+function setF(f){flt=f;tab="work";render()}
+function nav(){var T=[["work","📋 Work"],["add","➕ New task"],["notify","🔔 Notify team"],["team","👥 Team"],["clients","🏢 Clients"]];
+ document.getElementById("nav").innerHTML=T.map(function(t){return'<button class="'+(tab===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+t[1]+"</button>"}).join("")}
+function go(t){tab=t;render()}
+function render(){document.getElementById("viewdate").value=S.today;stats();nav();document.getElementById("main").innerHTML=({work:vWork,add:vAdd,notify:vNotify,team:vTeam,clients:vClients})[tab]()}
+document.getElementById("viewdate").addEventListener("change",function(){S.today=this.value||iso(new Date());save();render()});
+function vWork(){var F=[["today","Today"],["tomorrow","Tomorrow"],["week","Next 7 days"],["late","Overdue"],["post","Ready to post"],["blocked","Blocked"],["all","All"]];
+ var h='<div class="chips">'+F.map(function(f){return'<button class="'+(flt===f[0]?"on":"")+'" onclick="flt=\''+f[0]+'\';render()">'+f[1]+"</button>"}).join("")+'</div><div class="chips"><button class="'+(grp==="date"?"on":"")+'" onclick="grp=\'date\';render()">By time</button><button class="'+(grp==="person"?"on":"")+'" onclick="grp=\'person\';render()">By person</button><button class="'+(grp==="client"?"on":"")+'" onclick="grp=\'client\';render()">By client</button></div>';
+ var l=filt();if(!l.length)return h+'<div class="card mute">Nothing here. Add a task in "New task", or change the filter.</div>';
+ var G={};l.forEach(function(t){var ks=grp==="person"?(t.who.length?t.who.map(function(i){return(tm(i)||{}).name||"Unassigned"}):["Unassigned"]):grp==="client"?[(cl(t.client)||{}).name||"No client"]:[fd(t.date)];ks.forEach(function(k){(G[k]=G[k]||[]).push(t)})});
+ Object.keys(G).forEach(function(k){h+='<div class="card"><h2>'+esc(k)+" · "+G[k].length+"</h2>"+G[k].map(taskH).join("")+"</div>"});return h}
+function taskH(t){var s=stOf(t.status),c=cl(t.client),i=STAT.indexOf(s),nx=STAT[Math.min(i+1,4)];
+ return'<div class="task"><div class="top"><div><b>'+esc(t.title)+'</b><div>'+(c?'<span class="tag">🏢 '+esc(c.name)+"</span>":"")+(t.platform?'<span class="tag">'+esc(t.platform)+"</span>":"")+(t.time?'<span class="tag">'+ft(t.time)+"</span>":"")+(late(t)?'<span class="late">Overdue · '+fd(t.date)+"</span>":"")+"</div></div><span class=\"st\" style=\"background:"+s[2]+'">'+s[1]+"</span></div>"+
+ (t.who.length?'<div class="mute">👥 '+esc(whoN(t.who))+"</div>":"")+(t.loc?'<div class="mute">📍 '+esc(t.loc)+"</div>":"")+(t.notes?'<div class="mute">📝 '+esc(t.notes)+"</div>":"")+
+ '<div class="acts">'+(t.status!=="posted"&&t.status!=="blocked"?'<button class="g" onclick="adv(\''+t.id+'\')">Move to: '+nx[1]+"</button>":"")+'<select class="g" style="width:auto" onchange="setS(\''+t.id+'\',this.value)">'+STAT.map(function(x){return'<option value="'+x[0]+'"'+(x[0]===t.status?" selected":"")+">"+x[1]+"</option>"}).join("")+'</select><button class="g" onclick="notifyT(\''+t.id+'\',0)">📲 Assign</button><button class="g" onclick="notifyT(\''+t.id+'\',1)">⏰ Ask update</button><button class="g" onclick="delT(\''+t.id+'\')">Delete</button></div></div>'}
+function adv(i){S.tasks.forEach(function(t){if(t.id===i){var k=STAT.map(function(s){return s[0]}).indexOf(t.status);t.status=STAT[Math.min(k+1,4)][0]}});save();render()}
+function setS(i,v){S.tasks.forEach(function(t){if(t.id===i)t.status=v});save();render()}
+function delT(i){if(confirm("Delete this task?")){S.tasks=S.tasks.filter(function(t){return t.id!==i});save();render()}}
+function box(html){var b=document.getElementById("sendbox");if(!b){b=document.createElement("div");b.id="sendbox";document.getElementById("main").prepend(b)}b.innerHTML=html;window.scrollTo({top:0,behavior:"smooth"})}
+function links(list){return'<div class="card"><h2>Tap each person to send on WhatsApp</h2><div class="mute">WhatsApp opens with the message ready. Press send there.</div>'+list.map(function(x){return'<div class="person"><b>'+esc(x.n)+'</b><a class="wa" target="_blank" rel="noopener" href="'+wa(x.p,x.m)+'">Send on WhatsApp</a></div>'}).join("")+"</div>"}
+function notifyT(i,ask){var t=S.tasks.filter(function(x){return x.id===i})[0];var ms=t.who.map(tm).filter(function(m){return m&&m.phone});
+ if(!ms.length){toast("Assign someone with a phone number first (Team tab)");return}
+ box(links(ms.map(function(m){return{n:m.name,p:m.phone,m:ask?"Hi "+m.name+", quick update please on:\n"+tmsg(t)+"\n\nReply with: done / in progress / need help.":"Hi "+m.name+", new task for you:\n"+tmsg(t)}})))}
+function vAdd(){var tmpl=TYPES.map(function(x){return"<option>"+x+"</option>"}).join("");
+ return'<div class="card"><h2>New shoot / promotion task</h2><div class="grid"><div><label>Type</label><select id="a_ty" onchange="if(!g(\'a_t\'))document.getElementById(\'a_t\').value=this.value">'+tmpl+'</select></div><div><label>Task title</label><input id="a_t" placeholder="e.g. Reel for Hotel Rose room tour"></div><div><label>Client (hotel, restaurant...)</label><select id="a_c"><option value="">None</option>'+S.clients.map(function(c){return'<option value="'+c.id+'">'+esc(c.name)+"</option>"}).join("")+'</select></div><div><label>Date</label><input type="date" id="a_d" value="'+S.today+'"></div><div><label>Time</label><input type="time" id="a_ti" value="10:00"></div><div><label>Location</label><input id="a_l"></div><div><label>Post on</label><select id="a_p">'+PLAT.map(function(x){return"<option>"+x+"</option>"}).join("")+'</select></div></div><label>Instructions / shot list</label><textarea id="a_n" rows="3" placeholder="What to capture, offers to mention, music, deadline..."></textarea><label style="margin-top:6px">Assign to</label><div>'+(S.team.map(function(m){return'<label class="chk"><input type="checkbox" class="whoc" value="'+m.id+'">'+esc(m.name)+"</label>"}).join("")||'<span class="mute">Add team members first (Team tab)</span>')+'</div><div style="margin-top:10px"><button class="b" onclick="addT()">Save task</button></div></div>'}
+function addT(){var t=g("a_t").trim()||g("a_ty");var w=[].slice.call(document.querySelectorAll(".whoc:checked")).map(function(x){return x.value});
+ S.tasks.push({id:id(),title:t,client:g("a_c"),date:g("a_d"),time:g("a_ti"),loc:g("a_l"),platform:g("a_p"),notes:g("a_n"),who:w,status:"planned"});save();flt="all";tab="work";render();toast("Task saved. Use 📲 Assign to message the team.")}
+function dayList(d,m){return S.tasks.filter(function(t){return t.date===d&&isOpen(t)&&(!m||t.who.indexOf(m.id)>-1)}).sort(function(a,b){return(a.time||"").localeCompare(b.time||"")})}
+function vNotify(){return'<div class="card"><h2>Daily briefing for each person</h2><p class="mute">Sends every team member only their own tasks for the day.</p><div class="acts"><button class="b" onclick="brief(S.today)">Today\'s briefing</button><button class="b" onclick="brief(addDays(S.today,1))">Tomorrow\'s briefing</button></div><div id="sendbox"></div></div>'+
+ '<div class="card"><h2>Message the whole team</h2><textarea id="bm" rows="3" placeholder="e.g. Everyone upload today\'s raw footage by 8 PM"></textarea><div style="margin-top:8px"><button class="b" onclick="bcast()">Prepare messages</button></div></div>'+
+ '<div class="card"><h2>Alerts on this phone</h2><p class="mute">A pop-up before each shoot starts (works while this page is open).</p><div class="acts"><select style="width:auto" onchange="S.lead=+this.value;save()">'+[30,60,120,1440].map(function(v){return'<option value="'+v+'"'+(S.lead===v?" selected":"")+">"+(v===1440?"1 day":v+" min")+" before</option>"}).join("")+'</select><button class="g" onclick="try{Notification.requestPermission()}catch(e){toast(\'Not supported here\')}">Allow notifications</button></div></div>'+
+ '<div class="card mute">WhatsApp does not allow websites to send messages silently, so each message opens ready-to-send. This page saves data on this device only, so use the same phone to manage.</div>'}
+function brief(d){var out=[];S.team.forEach(function(m){if(!m.phone)return;var l=dayList(d,m);if(!l.length)return;out.push({n:m.name,p:m.phone,m:"Good morning "+m.name+"! Your tasks for "+fd(d)+":\n\n"+l.map(function(t,i){var c=cl(t.client);return(i+1)+". "+ft(t.time)+" – "+t.title+(c?" ["+c.name+"]":"")+(t.loc?" 📍"+t.loc:"")+(t.notes?"\n   📝 "+t.notes:"")}).join("\n")+"\n\nPlease reply once each one is done."})});
+ if(!out.length){toast("No team member with a phone number has tasks on "+fd(d));return}box(links(out))}
+function bcast(){var t=g("bm").trim();if(!t)return;var ms=S.team.filter(function(m){return m.phone});if(!ms.length){toast("Add phone numbers in the Team tab");return}box(links(ms.map(function(m){return{n:m.name,p:m.phone,m:"📣 "+t}})))}
+function vTeam(){var h='<div class="card"><h2>Add team member</h2><div class="grid"><div><label>Name</label><input id="m_n"></div><div><label>WhatsApp number</label><input id="m_p" type="tel" placeholder="98765 43210"></div><div><label>Role</label><input id="m_r" placeholder="Videographer, Editor, Designer..."></div></div><button class="b" onclick="addM()">Add</button></div><div class="card"><h2>Team ('+S.team.length+")</h2>";
+ if(!S.team.length)h+='<span class="mute">No one yet.</span>';
+ S.team.forEach(function(m){var o=S.tasks.filter(function(t){return t.who.indexOf(m.id)>-1&&isOpen(t)}).length;h+='<div class="person"><div><b>'+esc(m.name)+'</b> <span class="tag">'+esc(m.role||"Team")+'</span><div class="mute">'+(m.phone?esc(m.phone):"No number")+" · "+o+' open tasks</div></div><div class="acts">'+(m.phone?'<a class="wa" target="_blank" rel="noopener" href="'+wa(m.phone,"Hi "+m.name)+'">WhatsApp</a><a class="call" href="tel:+'+digits(m.phone)+'">Call</a>':"")+'<button class="g" onclick="editPh(\''+m.id+'\')">Edit number</button><button class="g" onclick="delM(\''+m.id+'\')">Remove</button></div></div>'});return h+"</div>"}
+function addM(){var n=g("m_n").trim();if(!n)return;S.team.push({id:id(),name:n,phone:g("m_p"),role:g("m_r")});save();render()}
+function delM(i){S.team=S.team.filter(function(m){return m.id!==i});S.tasks.forEach(function(t){t.who=t.who.filter(function(x){return x!==i})});save();render()}
+function editPh(i){var m=tm(i),p=prompt("WhatsApp number for "+m.name,m.phone||"");if(p!==null){m.phone=p;save();render()}}
+function vClients(){var h='<div class="card"><h2>Add client</h2><div class="grid"><div><label>Business name</label><input id="c_n" placeholder="Hotel / restaurant / shop"></div><div><label>Type</label><input id="c_ty" placeholder="Hotel, Restaurant, Brand"></div><div><label>Contact person</label><input id="c_c"></div><div><label>Phone</label><input id="c_p" type="tel"></div></div><button class="b" onclick="addC()">Add client</button></div><div class="card"><h2>Clients ('+S.clients.length+")</h2>";
+ if(!S.clients.length)h+='<span class="mute">No clients yet.</span>';
+ S.clients.forEach(function(c){var tt=S.tasks.filter(function(t){return t.client===c.id}),o=tt.filter(isOpen).length;h+='<div class="person"><div><b>'+esc(c.name)+'</b> <span class="tag">'+esc(c.type||"Client")+'</span><div class="mute">'+esc(c.contact||"")+" "+esc(c.phone||"")+" · "+o+" open / "+tt.length+' total</div></div><div class="acts">'+(c.phone?'<a class="wa" target="_blank" rel="noopener" href="'+wa(c.phone,"Hello "+(c.contact||"")+", update from our team regarding your content:")+'">WhatsApp client</a>':"")+'<button class="g" onclick="delC(\''+c.id+'\')">Remove</button></div></div>'});return h+"</div>"}
+function addC(){var n=g("c_n").trim();if(!n)return;S.clients.push({id:id(),name:n,type:g("c_ty"),contact:g("c_c"),phone:g("c_p")});save();render()}
+function delC(i){S.clients=S.clients.filter(function(c){return c.id!==i});save();render()}
+function tick(){var now=Date.now();S.tasks.forEach(function(t){if(!t.time||!t.date||!isOpen(t))return;var d=(new Date(t.date+"T"+t.time).getTime()-now)/6e4;
+ if(d<=S.lead&&d>-5&&!S.notified[t.id]){S.notified[t.id]=1;save();var m="⏰ "+t.title+" at "+ft(t.time)+(t.who.length?" – "+whoN(t.who):"");toast(m);try{if(Notification.permission==="granted")new Notification("Shoot starting soon",{body:m})}catch(x){}}})}
+load();S.today=iso(new Date());render();setInterval(tick,30000);tick();
+</script></body></html>
